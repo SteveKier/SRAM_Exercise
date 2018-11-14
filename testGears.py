@@ -32,6 +32,8 @@ class CTestGears(unittest.TestCase):
         gc = gears.CGearCombo(38, 0)
         ratio = gc.ratio()
         self.assertIsNone(ratio)
+        self.assertEqual(gc.as_string(True), "Front: 38, Rear: 0, Ratio None")
+        self.assertEqual(gc.as_string(False), "F:38 R:0 Ratio None")
 
     def test_drive_train(self):
         dt = gears.CDriveTrain()
@@ -86,6 +88,45 @@ class CTestGears(unittest.TestCase):
         r_cogs = 3.1415926
         success = dt.initCogs(f_cogs, r_cogs)
         self.assertFalse(success)
+
+    def test_get_gear_combination(self):
+        # Start with the example from the questions
+        f_cogs = [38, 30]
+        r_cogs = [28, 23, 19, 16]
+        target_ratio = 1.6
+        rval = gears.get_gear_combination(f_cogs, r_cogs, target_ratio)
+        self.assertEqual(rval, "Front: 30, Rear: 19, Ratio 1.579")
+
+        # try a few other ratios
+        rval = gears.get_gear_combination(f_cogs, r_cogs, 2.0)
+        self.assertEqual(rval, "Front: 38, Rear: 19, Ratio 2.000")
+        rval = gears.get_gear_combination(f_cogs, r_cogs, 1.8)
+        self.assertEqual(rval, "Front: 38, Rear: 23, Ratio 1.652")
+        rval = gears.get_gear_combination(f_cogs, r_cogs, 1.9)
+        self.assertEqual(rval, "Front: 30, Rear: 16, Ratio 1.875")
+        rval = gears.get_gear_combination(f_cogs, r_cogs, 1.1)
+        self.assertEqual(rval, "Front: 30, Rear: 28, Ratio 1.071")
+
+        # try a ridiculously high ratio that we can't reach, but we should
+        # still find the highest...
+        rval = gears.get_gear_combination(f_cogs, r_cogs, 105.0)
+        self.assertEqual(rval, "Front: 38, Rear: 16, Ratio 2.375")
+
+        # Now try one that's so low that there's no solution
+        rval = gears.get_gear_combination(f_cogs, r_cogs, 0.4)
+        self.assertTrue(rval.startswith("No combination"))
+
+        # Verify that when there's more than one way to achieve the
+        # target ratio, we select the first of the matches.  (NOTE: In
+        # the following, we could achieve a ratio of 6.0 with either 
+        # (36, 6) or (24, 4), but we expect to select (36, 6).  Let's 
+        # see if that's what happens.)
+        f_cogs = [36, 24]
+        r_cogs = [6, 4]
+        target_ratio = 6.0
+        rval = gears.get_gear_combination(f_cogs, r_cogs, target_ratio)
+        self.assertEqual(rval, "Front: 36, Rear: 6, Ratio 6.000")
+
 
 
 
