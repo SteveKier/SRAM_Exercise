@@ -76,13 +76,21 @@ class CDriveTrain(object):
 
 
 def get_gear_combination(f_cogs, r_cogs, target_ratio):
+    '''
+    Create a CDriveTrain with the given cog lists and call its getGearCombo()
+    method to find the gear combination whose ratio is closest to target_ratio.
+    If getGearCombo() returns None (see above), return None to indicate the 
+    failure.  Otherwise, print the string representation of the CGearCombo (and 
+    return that string).
+    '''
     # print ("===== get_gear_combination(f, r, {})".format(target_ratio))
     drive_train = CDriveTrain()
     if drive_train.initCogs(f_cogs, r_cogs):
         combo = drive_train.getGearCombo(target_ratio)
         if combo is None:
-            rval = "No combination yields a ratio at or below the target ({})".format(target_ratio)
+            print ("No combination yields a ratio at or below the target ({})".format(target_ratio))
+            rval = None
         else:
             rval = combo.as_string(True)
-    print (rval)
+            print (rval)
     return rval

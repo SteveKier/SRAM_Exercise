@@ -114,7 +114,7 @@ class CTestGears(unittest.TestCase):
 
         # Now try one that's so low that there's no solution
         rval = gears.get_gear_combination(f_cogs, r_cogs, 0.4)
-        self.assertTrue(rval.startswith("No combination"))
+        self.assertIsNone(rval)
 
         # Verify that when there's more than one way to achieve the
         # target ratio, we select the first of the matches.  (NOTE: In
