@@ -33,6 +33,61 @@ class CTestGears(unittest.TestCase):
         ratio = gc.ratio()
         self.assertIsNone(ratio)
 
+    def test_drive_train(self):
+        dt = gears.CDriveTrain()
+        f_cogs = [38, 30]
+        r_cogs = [28, 23,  19, 16]
+        success = dt.initCogs(f_cogs, r_cogs)
+        self.assertTrue(success)
+
+        # try different (but still legal) numbers
+        f_cogs = [54, 44, 38]
+        r_cogs = [32, 28, 22, 18, 14, 10]
+        success = dt.initCogs(f_cogs, r_cogs)
+        self.assertTrue(success)
+
+        # should fail if they aren't sorted
+        f_cogs = [44, 54, 38]
+        r_cogs = [32, 28, 22, 18, 14, 10]
+        success = dt.initCogs(f_cogs, r_cogs)
+        self.assertFalse(success)
+
+        # (again, but this time the rear sones are in the wrong order)
+        f_cogs = [54, 44, 38]
+        r_cogs = [10, 32, 28, 22, 18, 14]
+        success = dt.initCogs(f_cogs, r_cogs)
+        self.assertFalse(success)
+
+        # They must be sorted in DESCENDING order
+        f_cogs = [38, 44, 54]
+        r_cogs = [10, 14, 18, 22, 28, 32]
+        success = dt.initCogs(f_cogs, r_cogs)
+        self.assertFalse(success)
+
+        # Empty cog lists aren't good, either.
+        f_cogs = []
+        r_cogs = [10, 14, 18, 22, 28, 32]
+        success = dt.initCogs(f_cogs, r_cogs)
+        self.assertFalse(success)
+
+        # (again, with the rear list empty)
+        f_cogs = [38, 44, 54]
+        r_cogs = []
+        success = dt.initCogs(f_cogs, r_cogs)
+        self.assertFalse(success)
+
+        # Of course, the cog lists had better be lists!
+        f_cogs = "string"
+        r_cogs = [1, 2, 3]
+        success = dt.initCogs(f_cogs, r_cogs)
+        self.assertFalse(success)
+
+        f_cogs = [3, 5, 7]
+        r_cogs = 3.1415926
+        success = dt.initCogs(f_cogs, r_cogs)
+        self.assertFalse(success)
+
+
 
 
 if __name__ == "__main__":
