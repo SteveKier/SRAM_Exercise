@@ -127,6 +127,120 @@ class CTestGears(unittest.TestCase):
         rval = gears.get_gear_combination(f_cogs, r_cogs, target_ratio)
         self.assertEqual(rval, "Front: 36, Rear: 6, Ratio 6.000")
 
+    def test_nextStepTowards(self):
+        dt = gears.CDriveTrain()
+        f_cogs = [45, 38, 30]
+        r_cogs = [28, 23,  19, 16]
+        success = dt.initCogs(f_cogs, r_cogs)
+        self.assertTrue(success)
+
+        # Test "forward" movements
+        # Test a one-step that's just the rear cog
+        cur = gears.CGearCombo(38, 28)
+        dest = gears.CGearCombo(38, 23)
+        nextc = dt.nextStepTowards(cur, dest)
+        self.assertEqual(nextc, gears.CGearCombo(38, 23))
+
+        # Test a one-step that's just the front cog
+        cur = gears.CGearCombo(45, 28)
+        dest = gears.CGearCombo(38, 28)
+        nextc = dt.nextStepTowards(cur, dest)
+        self.assertEqual(nextc, gears.CGearCombo(38, 28))
+
+        # Test something more than one step.  We should still get just 
+        # the first step back.
+        cur = gears.CGearCombo(45, 28)
+        dest = gears.CGearCombo(38, 23)
+        nextc = dt.nextStepTowards(cur, dest)
+        self.assertEqual(nextc, gears.CGearCombo(38, 28))
+
+        # Now some "backward" movements
+        # Test a one-step that's just the rear cog
+        cur = gears.CGearCombo(38, 23)
+        dest = gears.CGearCombo(38, 28)
+        nextc = dt.nextStepTowards(cur, dest)
+        self.assertEqual(nextc, gears.CGearCombo(38, 28))
+
+        # Test a one-step that's just the front cog
+        cur = gears.CGearCombo(38, 28)
+        dest = gears.CGearCombo(45, 28)
+        nextc = dt.nextStepTowards(cur, dest)
+        self.assertEqual(nextc, gears.CGearCombo(45, 28))
+
+        # Test something more than one step.  We should still get just 
+        # the first step back.
+        cur = gears.CGearCombo(38, 23)
+        dest = gears.CGearCombo(45, 28)
+        nextc = dt.nextStepTowards(cur, dest)
+        self.assertEqual(nextc, gears.CGearCombo(45, 23))
+
+        # and test to be sure we get back the start when both start and
+        # end are the same
+        cur = gears.CGearCombo(38, 23)
+        # BTW, does the copy constructor work?  it should.hi, but I guess I haven't tested it yet.
+        dest = cur
+        self.assertEqual(cur, dest)
+        nextc = dt.nextStepTowards(cur, dest)
+        self.assertEqual(nextc, dest)
+        self.assertEqual(nextc, cur)
+
+    def test_get_shift_sequence(self):
+        # Start with the example from the questions
+        f_cogs = [38, 30]
+        r_cogs = [28, 23, 19, 16]
+        ratio = 1.6
+        initial_combination = gears.CGearCombo(38, 28)
+        path = gears.get_shift_sequence(f_cogs, r_cogs, ratio, initial_combination)
+        expected_path = [
+            gears.CGearCombo(38, 28),
+            gears.CGearCombo(30, 28),
+            gears.CGearCombo(30, 23),
+            gears.CGearCombo(30, 19)
+        ]
+        self.assertEqual(path, expected_path)
+
+        # Now try one that proceeds in the opposite direction
+        ratio = 1.1
+        initial_combination = gears.CGearCombo(38, 16)
+        path = gears.get_shift_sequence(f_cogs, r_cogs, ratio, initial_combination)
+        expected_path = [
+            gears.CGearCombo(38, 16),
+            gears.CGearCombo(30, 16),
+            gears.CGearCombo(30, 19),
+            gears.CGearCombo(30, 23),
+            gears.CGearCombo(30, 28)
+        ]
+        self.assertEqual(path, expected_path)
+
+        # Check that we handle a no-transition transition
+        ratio = 2.4
+        path = gears.get_shift_sequence(f_cogs, r_cogs, ratio, initial_combination)
+        expected_path = [
+            gears.CGearCombo(38, 16)
+        ]
+        self.assertEqual(path, expected_path)
+
+        # Finally, be sure we handle an impossible request gracefully
+        ratio = 0.5
+        path = gears.get_shift_sequence(f_cogs, r_cogs, ratio, initial_combination)
+        self.assertIsNone(path)
+
+    def test_equality_operators(self):
+        first = gears.CGearCombo(14, 25)
+        second = gears.CGearCombo(14, 30)
+        third = gears.CGearCombo(15, 25)
+        same_as_first = gears.CGearCombo(14, 25)
+
+        self.assertTrue(first == same_as_first)
+        self.assertTrue(first == first)
+        self.assertFalse(first == second)
+        self.assertFalse(first == third)
+
+        self.assertFalse(first != first)
+        self.assertFalse(first != same_as_first)
+        self.assertTrue(first != second)
+        self.assertTrue(first != third)
+
 
 
 

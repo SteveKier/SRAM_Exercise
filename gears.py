@@ -20,6 +20,15 @@ class CGearCombo(object):
         ratioAsStr = "{:.3f}".format(ratio) if ratio else "None"
         return fmt.format(self._num_front, self._num_rear, ratioAsStr)
 
+    def __str__(self):
+        return self.as_string()
+
+    def __eq__(self, other):
+        return self._num_front == other._num_front and self._num_rear == other._num_rear
+
+    def __ne__(self, other):
+        return not (self == other)
+
 
 class CDriveTrain(object):
     def __init__(self):
@@ -32,8 +41,8 @@ class CDriveTrain(object):
         Also be sure they are lists (!)
         Return True if all is well, False otherwise
         '''
-        self._frontCogs = front
-        self._rearCogs = rear
+        self._front_cogs = front
+        self._rear_cogs = rear
         rval = False
         if not(isinstance(front, list) and isinstance(rear, list)):
             print ("initCogs() passed non-list argument(s): front={}, rear={}".format(front, rear))
@@ -57,8 +66,8 @@ class CDriveTrain(object):
         '''
         closestRatio = 2 * target_ratio
         closestCombo = None
-        for numFront in self._frontCogs:
-            for numRear in self._rearCogs:
+        for numFront in self._front_cogs:
+            for numRear in self._rear_cogs:
                 combo = CGearCombo(numFront, numRear)
                 ratio = combo.ratio()
                 # print ("for f={}, r={}, combo={}, ratio={}".format(numFront, numRear, combo, ratio))
@@ -73,6 +82,56 @@ class CDriveTrain(object):
                         closestRatio = diff
                         closestCombo = combo
         return closestCombo
+
+    def nextStepTowards(self, fromCombo, toCombo):
+        '''
+        Given CGearCombos 'fromCombo' and 'toCombo', figure out the next 
+        'adjacent' combo after 'fromCombo' that moves us towards 'toCombo.'
+        Our strategy is to adjust the front cog until it matches to.front,
+        and then adjust the rear cog until both match.  If the caller 
+        passes us equal combos (i.e., if from == to), we just return from.
+        '''
+        combo = fromCombo
+        if fromCombo == toCombo:
+            print ("ERROR: nextStepTowards() receives equal CGearCombos ({})".format(fromCombo))
+        else:
+            idxFrom = self._front_cogs.index(fromCombo._num_front)
+            idxTo = self._front_cogs.index(toCombo._num_front)
+            distance = idxTo - idxFrom
+            if distance:
+                # Still need to adjust the front cog
+                incr = int(distance / abs(distance))
+                combo = CGearCombo(self._front_cogs[idxFrom + incr], fromCombo._num_rear)
+            else:
+                # need to adjust the rear cog
+                idxFrom = self._rear_cogs.index(fromCombo._num_rear)
+                idxTo = self._rear_cogs.index(toCombo._num_rear)
+                distance = idxTo - idxFrom
+                incr = int(distance / abs(distance))
+                # print (fromCombo)
+                # print (fromCombo._num_front)
+                # print (idxFrom)
+                # print (incr)
+                # print (self._rear_cogs[idxFrom + incr])
+                combo = CGearCombo(fromCombo._num_front, self._rear_cogs[idxFrom + incr])
+
+        # print ("nextStepTowards(fr={}, to={}) returns {}".format(fromCombo, toCombo, combo))
+        return combo
+
+    def getShiftSequence(self, target_ratio, start_combo):
+        sequence = None
+        end_combo = self.getGearCombo(target_ratio)
+        if not end_combo:
+            print ("No path to desired target ({}).  Return None".format(target_ratio))
+            sequence = None
+        else:
+            sequence = [start_combo]
+            cur_combo = start_combo
+            while cur_combo != end_combo:
+                cur_combo = self.nextStepTowards(cur_combo, end_combo)
+                sequence.append(cur_combo)
+        return sequence
+
 
 
 def get_gear_combination(f_cogs, r_cogs, target_ratio):
@@ -94,3 +153,23 @@ def get_gear_combination(f_cogs, r_cogs, target_ratio):
             rval = combo.as_string(True)
             print (rval)
     return rval
+
+def get_shift_sequence(f_cogs, r_cogs, ratio, initial_combination):
+    '''
+    Create a CDriveTrain with the given cog lists and call its getShiftSequence()
+    method to get the list of CGearCombos that represents the "path" from 
+    "initial_combination" to a gear combo that gets us as close as possible to
+    "ratio."  If there's no path, return None and print a message.  If things
+    go well, print the path (and return it to the caller).
+    '''
+    print ("===== get_shift_sequence(f, r, tgt= {}, init={})".format(ratio, initial_combination))
+    drive_train = CDriveTrain()
+    if drive_train.initCogs(f_cogs, r_cogs):
+        path = drive_train.getShiftSequence(ratio, initial_combination)
+        if path is None:
+            print ("No path to target ({})".format(ratio))
+        else:
+            for idx, combo in enumerate(path):
+                print ("{} - {}".format(idx+1, combo.as_string(False)))
+    return path
+
