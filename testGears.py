@@ -242,8 +242,5 @@ class CTestGears(unittest.TestCase):
         self.assertTrue(first != third)
 
 
-
-
-
 if __name__ == "__main__":
     unittest.main()

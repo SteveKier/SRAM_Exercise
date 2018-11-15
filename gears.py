@@ -162,7 +162,7 @@ def get_shift_sequence(f_cogs, r_cogs, ratio, initial_combination):
     "ratio."  If there's no path, return None and print a message.  If things
     go well, print the path (and return it to the caller).
     '''
-    print ("===== get_shift_sequence(f, r, tgt= {}, init={})".format(ratio, initial_combination))
+    # print ("===== get_shift_sequence(f, r, tgt= {}, init={})".format(ratio, initial_combination))
     drive_train = CDriveTrain()
     if drive_train.initCogs(f_cogs, r_cogs):
         path = drive_train.getShiftSequence(ratio, initial_combination)
@@ -173,3 +173,19 @@ def get_shift_sequence(f_cogs, r_cogs, ratio, initial_combination):
                 print ("{} - {}".format(idx+1, combo.as_string(False)))
     return path
 
+def demo():
+    print ("===== Problem #1: get_gear_combination()")
+    f_cogs = [38, 30]
+    r_cogs = [28, 23, 19, 16]
+    target_ratio = 1.6
+    get_gear_combination(f_cogs, r_cogs, target_ratio)
+
+    print ("===== Problem #2: get_shift_sequence()")
+    f_cogs = [38, 30]
+    r_cogs = [28, 23, 19, 16]
+    ratio = 1.6
+    initial_combination = CGearCombo(38, 28)
+    get_shift_sequence(f_cogs, r_cogs, ratio, initial_combination)
+
+if __name__ == "__main__":
+    demo()
