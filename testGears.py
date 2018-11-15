@@ -127,6 +127,10 @@ class CTestGears(unittest.TestCase):
         rval = gears.get_gear_combination(f_cogs, r_cogs, target_ratio)
         self.assertEqual(rval, "Front: 36, Rear: 6, Ratio 6.000")
 
+        # Finally, be sure we handle error cases properly
+        path = gears.get_gear_combination([], [], target_ratio)
+        self.assertIsNone(path)
+
     def test_nextStepTowards(self):
         dt = gears.CDriveTrain()
         f_cogs = [45, 38, 30]

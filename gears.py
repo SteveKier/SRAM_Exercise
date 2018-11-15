@@ -143,6 +143,7 @@ def get_gear_combination(f_cogs, r_cogs, target_ratio):
     return that string).
     '''
     # print ("===== get_gear_combination(f, r, {})".format(target_ratio))
+    rval = None
     drive_train = CDriveTrain()
     if drive_train.initCogs(f_cogs, r_cogs):
         combo = drive_train.getGearCombo(target_ratio)
