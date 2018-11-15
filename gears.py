@@ -163,8 +163,11 @@ def get_shift_sequence(f_cogs, r_cogs, ratio, initial_combination):
     go well, print the path (and return it to the caller).
     '''
     # print ("===== get_shift_sequence(f, r, tgt= {}, init={})".format(ratio, initial_combination))
+    path = None
     drive_train = CDriveTrain()
-    if drive_train.initCogs(f_cogs, r_cogs):
+    if not drive_train.initCogs(f_cogs, r_cogs):
+        print ("ERROR: Unable to initialize CDriveTrain")
+    else:
         path = drive_train.getShiftSequence(ratio, initial_combination)
         if path is None:
             print ("No path to target ({})".format(ratio))

@@ -54,7 +54,7 @@ class CTestGears(unittest.TestCase):
         success = dt.initCogs(f_cogs, r_cogs)
         self.assertFalse(success)
 
-        # (again, but this time the rear sones are in the wrong order)
+        # (again, but this time the rear ones are in the wrong order)
         f_cogs = [54, 44, 38]
         r_cogs = [10, 32, 28, 22, 18, 14]
         success = dt.initCogs(f_cogs, r_cogs)
@@ -220,9 +220,13 @@ class CTestGears(unittest.TestCase):
         ]
         self.assertEqual(path, expected_path)
 
-        # Finally, be sure we handle an impossible request gracefully
+        # Be sure we handle an impossible request gracefully
         ratio = 0.5
         path = gears.get_shift_sequence(f_cogs, r_cogs, ratio, initial_combination)
+        self.assertIsNone(path)
+
+        # Finally, be sure we handle error cases properly
+        path = gears.get_shift_sequence([], [], ratio, initial_combination)
         self.assertIsNone(path)
 
     def test_equality_operators(self):
